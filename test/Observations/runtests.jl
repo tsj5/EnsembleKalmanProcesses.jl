@@ -43,14 +43,14 @@ using EnsembleKalmanProcesses.Observations
     data_name = "d1"
     obs = Obs(sample, data_name)
     @test obs.mean == vec(sample)
-    @test obs.obs_noise_cov == nothing
+    @test obs.obs_noise_cov === nothing
 
     #Generating a single sample (vector of vector)
     sample = [[1.0, 2.0, 3.0]]
     data_name = "d1"
     obs = Obs(sample, data_name)
     @test obs.mean == sample[1]
-    @test obs.obs_noise_cov == nothing
+    @test obs.obs_noise_cov === nothing
 
     # Generating a single sample with cov (a column vector)
     sample = reshape([1.0, 2.0, 3.0], 3, 1)

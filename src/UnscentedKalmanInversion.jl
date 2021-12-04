@@ -378,7 +378,7 @@ function Gaussian_2d(
     if xx === nothing
         xx = Array(LinRange(u_mean[1] - u_range[1], u_mean[1] + u_range[1], Nx))
     end
-    if yy == nothing
+    if yy === nothing
         yy = Array(LinRange(u_mean[2] - u_range[2], u_mean[2] + u_range[2], Ny))
     end
     X, Y = repeat(xx, 1, Ny), Array(repeat(yy, 1, Nx)')
