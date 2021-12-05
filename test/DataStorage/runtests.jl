@@ -1,6 +1,7 @@
 using Test
 using Distributions
 using Random
+using LinearAlgebra
 
 using EnsembleKalmanProcesses.DataStorage
 
@@ -8,12 +9,14 @@ using EnsembleKalmanProcesses.DataStorage
     seed = 2021
     Random.seed!(seed)
 
-    parameter_samples = rand(MvNormal(2, 0.1), 10) #10 samples of 4D params
-    data_samples = rand(MvNormal(12, 2), 10) #10 samples of 12D data
+    param_cov = Diagonal(fill(0.1 ^ 2, 2))
+    parameter_samples = rand(MvNormal(param_cov), 10) #10 samples of 4D params
+    data_cov = Diagonal(fill(12.0 ^ 2, 2))
+    data_samples = rand(MvNormal(data_cov), 10) #10 samples of 12D data
     data_samples_short = data_samples[:, 1:(end - 1)]
 
-    new_parameter_samples = rand(MvNormal(2, 0.1), 10) #10 samples of 4D params
-    new_data_samples = rand(MvNormal(12, 2), 10) #10 samples of 12D data
+    new_parameter_samples = rand(MvNormal(param_cov), 10) #10 samples of 4D params
+    new_data_samples = rand(MvNormal(data_cov), 10) #10 samples of 12D data
     new_data_samples_short = new_data_samples[:, 1:(end - 1)]
 
     #test DataContainer

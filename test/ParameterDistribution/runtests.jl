@@ -2,6 +2,7 @@ using Test
 using Distributions
 using StatsBase
 using Random
+using LinearAlgebra
 
 using EnsembleKalmanProcesses.ParameterDistributionStorage
 
@@ -60,7 +61,8 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
         @test u.names == [name]
 
         # Tests for the ParameterDistribution
-        d = Parameterized(MvNormal(4, 0.1))
+        param_cov = Diagonal(fill(0.1 ^ 2, 4))
+        d = Parameterized(MvNormal(param_cov))
         c = [no_constraint(), bounded_below(-1.0), bounded_above(0.4), bounded(-0.1, 0.2)]
 
         name = "constrained_mvnormal"
@@ -72,7 +74,7 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
         @test_throws DimensionMismatch ParameterDistribution(d, c, [name, "extra_name"])
 
         # Tests for the ParameterDistribution
-        d1 = Parameterized(MvNormal(4, 0.1))
+        d1 = Parameterized(MvNormal(param_cov))
         c1 = [no_constraint(), bounded_below(-1.0), bounded_above(0.4), bounded(-0.1, 0.2)]
         name1 = "constrained_mvnormal"
         u1 = ParameterDistribution(d1, c1, name1)
@@ -90,7 +92,8 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
 
     @testset "getter functions" begin
         # setup for the tests:
-        d1 = Parameterized(MvNormal(4, 0.1))
+        param_cov = Diagonal(fill(0.1 ^ 2, 4))
+        d1 = Parameterized(MvNormal(param_cov))
         c1 = [no_constraint(), bounded_below(-1.0), bounded_above(0.4), bounded(-0.1, 0.2)]
         name1 = "constrained_mvnormal"
         u1 = ParameterDistribution(d1, c1, name1)
@@ -119,13 +122,13 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
         @test get_n_samples(u)[name2] == 4
 
         # Tests for get_distribution
-        @test get_distribution(d1) == MvNormal(4, 0.1)
-        @test get_distribution(u1)[name1] == MvNormal(4, 0.1)
+        @test get_distribution(d1) == MvNormal(param_cov)
+        @test get_distribution(u1)[name1] == MvNormal(param_cov)
         @test typeof(get_distribution(d2)) == Array{Int64, 2}
         @test typeof(get_distribution(u2)[name2]) == Array{Int64, 2}
 
         d = get_distribution(u)
-        @test d[name1] == MvNormal(4, 0.1)
+        @test d[name1] == MvNormal(param_cov)
         @test typeof(d[name2]) == Array{Int64, 2}
 
         # Test for get_all_constraints
@@ -135,7 +138,8 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
     @testset "statistics functions" begin
 
         # setup for the tests:
-        d1 = Parameterized(MvNormal(4, 0.1))
+        param_cov = Diagonal(fill(0.1 ^ 2, 4))
+        d1 = Parameterized(MvNormal(param_cov))
         c1 = [no_constraint(), bounded_below(-1.0), bounded_above(0.4), bounded(-0.1, 0.2)]
         name1 = "constrained_mvnormal"
         u1 = ParameterDistribution(d1, c1, name1)
@@ -160,12 +164,12 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
         # Tests for sample distribution
         seed = 2020
         Random.seed!(seed)
-        s1 = rand(MvNormal(4, 0.1), 1)
+        s1 = rand(MvNormal(param_cov), 1)
         Random.seed!(seed)
         @test sample_distribution(u1) == s1
 
         Random.seed!(seed)
-        s1 = rand(MvNormal(4, 0.1), 3)
+        s1 = rand(MvNormal(param_cov), 3)
         Random.seed!(seed)
         @test sample_distribution(u1, 3) == s1
 
@@ -209,7 +213,8 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
     @testset "transform functions" begin
         #setup for the tests
         tol = 1e-8
-        d1 = Parameterized(MvNormal(4, 0.1))
+        param_cov = Diagonal(fill(0.1 ^ 2, 4))
+        d1 = Parameterized(MvNormal(param_cov))
         c1 = [no_constraint(), bounded_below(-1.0), bounded_above(0.4), bounded(-0.1, 0.2)]
         name1 = "constrained_mvnormal"
         u1 = ParameterDistribution(d1, c1, name1)
@@ -221,7 +226,7 @@ using EnsembleKalmanProcesses.ParameterDistributionStorage
 
         u = ParameterDistribution([d1, d2], [c1, c2], [name1, name2])
 
-        x_unbd = rand(MvNormal(6, 3), 1000)  #6 x 1000 
+        x_unbd = rand(MvNormal(Diagonal(fill(3.0 ^ 2, 6))), 1000)  #6 x 1000 
         # Tests for transforms
         x_real_constrained1 = mapslices(x -> transform_unconstrained_to_constrained(u1, x), x_unbd[1:4, :]; dims = 1)
         @test isapprox(
